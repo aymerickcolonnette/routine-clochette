@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta name="theme-color" content="#0A0D12"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>Routine · Clochette</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0A0D12;--bg2:#111520;--bg3:#181D28;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);
+  --text:#F0EDE6;--text2:#8B8F9E;--text3:#555A6A;
+  --green:#00E5A0;--green-dim:rgba(0,229,160,.12);
+  --amber:#F5A623;--amber-dim:rgba(245,166,35,.12);
+  --red:#FF4D6A;--red-dim:rgba(255,77,106,.12);
+  --blue:#4D9FFF;--blue-dim:rgba(77,159,255,.12);
+  --nav-h:62px;--radius:14px;--radius-sm:9px
+}
+html,body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overscroll-behavior:none}
+.nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:rgba(10,13,18,.94);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;z-index:50;gap:10px}
+.nav-title{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:#D6B06A;letter-spacing:.08em;flex:1}
+.nav-date{font-size:11px;color:var(--text3);font-family:'Space Mono',monospace}
+.tab-bar{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);background:rgba(10,13,18,.96);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(3,1fr);z-index:50;padding-bottom:env(safe-area-inset-bottom)}
+.tab-btn{border:0;background:transparent;color:var(--text3);font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;position:relative;cursor:pointer}
+.tab-btn.active{color:var(--green)}
+.tab-btn.active::before{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:var(--green);box-shadow:0 0 8px var(--green)}
+.tab-icon{font-size:18px}
+.main{padding:calc(var(--nav-h) + 14px) 14px calc(var(--nav-h) + 16px)}
+.page{display:none}.page.active{display:block;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.page-header{margin-bottom:16px}
+.page-title{font-size:20px;font-weight:800;letter-spacing:-.02em}
+.page-sub{font-size:12px;color:var(--text3);margin-top:3px}
+
+/* PROGRESS */
+.progress-bar-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 15px;margin-bottom:14px}
+.progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.progress-label{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--text3)}
+.progress-pct{font-family:'Space Mono',monospace;font-size:13px;color:var(--green)}
+.progress-track{height:6px;background:var(--bg3);border-radius:999px;overflow:hidden}
+.progress-fill{height:100%;background:var(--green);box-shadow:0 0 8px var(--green);transition:width .4s;width:0%}
+
+/* BLOCS */
+.bloc-label{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);margin:14px 0 8px;display:flex;align-items:center;gap:8px}
+.bloc-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.bloc-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+
+/* ITEMS CHECKLIST */
+.check-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+.check-item:last-child{border-bottom:none}
+.check-box{min-width:22px;height:22px;border-radius:6px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .2s}
+.check-box.done{border-color:var(--green);background:var(--green);box-shadow:0 0 10px rgba(0,229,160,.3)}
+.check-mark{display:none;width:12px;height:9px}
+.check-mark path{stroke:#0A0D12;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.check-box.done .check-mark{display:block}
+.check-content{flex:1}
+.check-main{font-size:13.5px;font-weight:600;line-height:1.4}
+.check-main.done{color:var(--text3);text-decoration:line-through}
+.check-sub{font-size:11.5px;color:var(--text3);margin-top:3px;line-height:1.4}
+.dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0}
+.dot-green{background:var(--green)}.dot-blue{background:var(--blue)}.dot-amber{background:var(--amber)}.dot-red{background:var(--red)}.dot-gray{background:var(--text3)}
+
+/* REGLE */
+.regle-card{background:var(--red-dim);border:1px solid rgba(255,77,106,.25);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px}
+.regle-text{font-size:13px;color:var(--red);font-weight:700;line-height:1.5}
+
+/* RESET */
+.reset-btn{width:100%;padding:11px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;margin-top:4px}
+.reset-btn:active{background:var(--bg3)}
+
+/* JOURNAL */
+.journal-form{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+.input-label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:6px}
+.input-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.input-field,.select-field,.textarea-field{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:11px 12px;color:var(--text);outline:none;-webkit-appearance:none;font-family:'Space Mono',monospace;font-size:13px}
+.textarea-field{font-family:'Syne',sans-serif;min-height:70px;resize:vertical}
+.add-btn{width:100%;padding:11px;border-radius:var(--radius-sm);border:1px solid rgba(0,229,160,.25);background:var(--green-dim);color:var(--green);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;margin-top:4px}
+.journal-list{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.journal-entry{padding:12px 14px;border-bottom:1px solid var(--border)}
+.journal-entry:last-child{border-bottom:none}
+.j-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.j-time{font-family:'Space Mono',monospace;font-size:10px;color:var(--text3)}
+.j-intensity{font-size:10px;font-weight:800;padding:2px 7px;border-radius:4px}
+.j-low{background:var(--green-dim);color:var(--green)}.j-mid{background:var(--amber-dim);color:var(--amber)}.j-high{background:var(--red-dim);color:var(--red)}
+.j-context{font-size:12px;color:var(--text2);font-weight:600}
+.j-notes{font-size:11.5px;color:var(--text3);margin-top:3px;line-height:1.4}
+.empty-state{text-align:center;padding:2rem;color:var(--text3);font-size:13px}
+
+/* NOTIFS */
+.notif-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+.notif-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.notif-row:last-child{border-bottom:none}
+.notif-info{flex:1}
+.notif-name{font-size:13px;font-weight:600}
+.notif-time{font-family:'Space Mono',monospace;font-size:11px;color:var(--text3);margin-top:2px}
+.toggle{width:44px;height:26px;border-radius:999px;background:var(--bg3);border:1px solid var(--border2);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--green);border-color:var(--green);box-shadow:0 0 8px rgba(0,229,160,.3)}
+.toggle-dot{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s}
+.toggle.on .toggle-dot{transform:translateX(18px)}
+.notif-perm-btn{width:100%;padding:11px;border-radius:var(--radius-sm);border:1px solid rgba(77,159,255,.25);background:var(--blue-dim);color:var(--blue);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;margin-top:10px}
+
+/* EXPORT */
+.export-btn{width:100%;padding:11px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;margin-top:8px}
+
+/* TOAST */
+.toast{position:fixed;left:14px;right:14px;top:calc(var(--nav-h)+10px);background:#0d1c18;border:1px solid rgba(0,229,160,.35);color:var(--green);padding:11px 14px;border-radius:12px;z-index:90;font-size:13px;font-weight:800;display:none;box-shadow:0 12px 30px rgba(0,0,0,.28);animation:slideDown .25s ease}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<nav class="nav">
+  <div class="nav-title">ROUTINE · FBO</div>
+  <div class="nav-date" id="navDate"></div>
+</nav>
+
+<main class="main">
+
+<!-- PAGE ROUTINE -->
+<section class="page active" id="page-routine">
+  <div class="page-header">
+    <div class="page-title">Ma routine</div>
+    <div class="page-sub">Coche chaque etape au fil de la journee.</div>
+  </div>
+
+  <div class="regle-card">
+    <div class="regle-text">Regle absolue — 1 seul joint le soir, uniquement pour dormir.</div>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-top">
+      <div class="progress-label">Progression du jour</div>
+      <div class="progress-pct" id="pct">0%</div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="pFill"></div></div>
+  </div>
+
+  <div id="routine-items"></div>
+  <button class="reset-btn" onclick="resetRoutine()">Reinitialiser la journee</button>
+</section>
+
+<!-- PAGE JOURNAL -->
+<section class="page" id="page-journal">
+  <div class="page-header">
+    <div class="page-title">Journal envies</div>
+    <div class="page-sub">Note chaque envie de fumer pour reperer les patterns.</div>
+  </div>
+
+  <div class="journal-form">
+    <div class="input-row">
+      <div>
+        <label class="input-label">Contexte</label>
+        <select class="select-field" id="jCtx">
+          <option>Ennui</option>
+          <option>Amis</option>
+          <option>Stress</option>
+          <option>Apres repas</option>
+          <option>Autre</option>
+        </select>
+      </div>
+      <div>
+        <label class="input-label">Intensite</label>
+        <select class="select-field" id="jInt">
+          <option value="low">Faible</option>
+          <option value="mid">Moyenne</option>
+          <option value="high">Forte</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-bottom:10px">
+      <label class="input-label">Notes (optionnel)</label>
+      <textarea class="textarea-field" id="jNotes" placeholder="Qu'est-ce qui a declenche l'envie ?"></textarea>
+    </div>
+    <button class="add-btn" onclick="addEnvie()">+ Enregistrer cette envie</button>
+  </div>
+
+  <div id="journal-list"></div>
+  <button class="export-btn" onclick="exportJournal()">Exporter le journal (JSON)</button>
+</section>
+
+<!-- PAGE NOTIFS -->
+<section class="page" id="page-notifs">
+  <div class="page-header">
+    <div class="page-title">Notifications</div>
+    <div class="page-sub">Active les rappels pour rester dans ta routine.</div>
+  </div>
+
+  <div class="notif-section" id="notif-list"></div>
+  <button class="notif-perm-btn" id="permBtn" onclick="requestPerm()">Activer les notifications</button>
+</section>
+
+</main>
+
+<nav class="tab-bar">
+  <button class="tab-btn active" onclick="showPage('routine',this)"><div class="tab-icon">✓</div>Routine</button>
+  <button class="tab-btn" onclick="showPage('journal',this)"><div class="tab-icon">📓</div>Journal</button>
+  <button class="tab-btn" onclick="showPage('notifs',this)"><div class="tab-icon">🔔</div>Notifs</button>
+</nav>
+
+<script>
+// DATE
+const navDate = document.getElementById('navDate');
+const now = new Date();
+navDate.textContent = now.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}).toUpperCase();
+
+// ROUTINE DATA
+const BLOCS = [
+  {label:'Matin — reveil', color:'dot-green', items:[
+    {id:'eau', main:"Grand verre d'eau", sub:'Avant toute autre chose'},
+    {id:'marche', main:'10 min de marche dehors', sub:'Lumiere naturelle, casse le reflexe cigarette'},
+    {id:'dejeuner', main:'Petit dejeuner', sub:"Avant d'ouvrir les charts"},
+  ]},
+  {label:'Avant chaque session', color:'dot-blue', items:[
+    {id:'htf', main:'Analyse HTF — Daily / 4H', sub:'Flux, BOS, OB en attente, contexte general'},
+    {id:'respiration', main:'5 min de respiration calme', sub:"Avant d'ouvrir TradingView"},
+    {id:'checklist', main:'Checklist FBO ouverte', sub:'Appli prete avant le premier setup'},
+    {id:'limites', main:'Fixer les limites du jour', sub:'Max 2 setups — stop si 2 pertes'},
+  ]},
+  {label:'Apres-midi — gestion des envies', color:'dot-amber', items:[
+    {id:'envie', main:'Envie de fumer ? Ouvre TradingView', sub:'Backtest ou analyse — occupe le cerveau'},
+    {id:'journal', main:'Note chaque envie dans le journal', sub:'Contexte + intensite'},
+    {id:'eau2', main:'Eau froide ou tisane', sub:'Remplace le geste physique'},
+  ]},
+  {label:'Soir', color:'dot-gray', items:[
+    {id:'charts', main:'Fermer les charts a heure fixe', sub:"Le soir c'est repos, pas d'analyse tardive"},
+    {id:'activite', main:'Activite calme — lecture, musique', sub:'Occupe les mains et le cerveau'},
+    {id:'joint', main:'1 seul joint pour dormir', sub:'Limite stricte — pas de derogation', color:'dot-red'},
+  ]},
+];
+const TOTAL_ITEMS = BLOCS.reduce((a,b)=>a+b.items.length,0);
+
+function getChecked(){return JSON.parse(localStorage.getItem('routine-checked-'+getTodayKey())||'{}')}
+function setChecked(d){localStorage.setItem('routine-checked-'+getTodayKey(),JSON.stringify(d))}
+function getTodayKey(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
+
+function buildRoutine(){
+  const checked = getChecked();
+  let html = '';
+  BLOCS.forEach(bloc=>{
+    html += `<div class="bloc-label">${bloc.label}</div><div class="bloc-card">`;
+    bloc.items.forEach(item=>{
+      const isDone = checked[item.id];
+      const dotColor = item.color || bloc.color;
+      html += `<div class="check-item" onclick="toggleItem('${item.id}')">
+        <div class="dot ${dotColor}"></div>
+        <div class="check-content">
+          <div class="check-main${isDone?' done':''}">${item.main}</div>
+          <div class="check-sub">${item.sub}</div>
+        </div>
+        <div class="check-box${isDone?' done':''}">
+          <svg class="check-mark" viewBox="0 0 12 9"><path d="M1 4L4.5 7.5L11 1"/></svg>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  document.getElementById('routine-items').innerHTML = html;
+  updateProgress();
+}
+
+function toggleItem(id){
+  const d = getChecked();
+  d[id] = !d[id];
+  if(!d[id]) delete d[id];
+  setChecked(d);
+  buildRoutine();
+}
+
+function updateProgress(){
+  const checked = getChecked();
+  const count = Object.keys(checked).filter(k=>checked[k]).length;
+  const pct = Math.round(count/TOTAL_ITEMS*100);
+  document.getElementById('pct').textContent = pct+'%';
+  document.getElementById('pFill').style.width = pct+'%';
+}
+
+function resetRoutine(){
+  if(confirm('Reinitialiser toutes les cases du jour ?')){
+    localStorage.removeItem('routine-checked-'+getTodayKey());
+    buildRoutine();
+    toast('Journee reinitialisee');
+  }
+}
+
+// JOURNAL
+function getEnvies(){return JSON.parse(localStorage.getItem('routine-journal')||'[]')}
+function saveEnvies(d){localStorage.setItem('routine-journal',JSON.stringify(d))}
+
+function addEnvie(){
+  const ctx = document.getElementById('jCtx').value;
+  const intensity = document.getElementById('jInt').value;
+  const notes = document.getElementById('jNotes').value;
+  const d = getEnvies();
+  const now = new Date();
+  d.unshift({
+    time: now.toLocaleDateString('fr-FR')+' '+now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),
+    ctx, intensity, notes
+  });
+  saveEnvies(d);
+  document.getElementById('jNotes').value='';
+  renderJournal();
+  toast('Envie enregistree');
+}
+
+function renderJournal(){
+  const d = getEnvies();
+  const el = document.getElementById('journal-list');
+  if(!d.length){
+    el.innerHTML='<div class="empty-state">Aucune envie enregistree</div>';
+    return;
+  }
+  const intMap = {low:['Faible','j-low'],mid:['Moyenne','j-mid'],high:['Forte','j-high']};
+  el.innerHTML = '<div class="journal-list">'+d.map(e=>`
+    <div class="journal-entry">
+      <div class="j-header">
+        <div class="j-time">${e.time}</div>
+        <span class="j-intensity ${intMap[e.intensity][1]}">${intMap[e.intensity][0]}</span>
+      </div>
+      <div class="j-context">${e.ctx}</div>
+      ${e.notes?`<div class="j-notes">${e.notes}</div>`:''}
+    </div>`).join('')+'</div>';
+}
+
+function exportJournal(){
+  const d = getEnvies();
+  const blob = new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'journal-envies.json';
+  a.click();
+}
+
+// NOTIFICATIONS
+const NOTIFS = [
+  {id:'reveil',    name:'Reveil — Grand verre d\'eau',   h:8,  m:0,  tag:'reveil'},
+  {id:'marche',    name:'Marche matinale 10 min',        h:8,  m:5,  tag:'marche'},
+  {id:'london',    name:'Session London — Analyse HTF',  h:9,  m:0,  tag:'london'},
+  {id:'overlap',   name:'NY Overlap — setup actif',      h:13, m:0,  tag:'overlap'},
+  {id:'fermer',    name:'Fermer les charts',             h:17, m:0,  tag:'fermer'},
+  {id:'lecture',   name:'Activite calme du soir',        h:20, m:0,  tag:'lecture'},
+  {id:'rappel',    name:'Rappel — 1 seul joint max',     h:21, m:0,  tag:'rappel'},
+];
+
+function getToggles(){return JSON.parse(localStorage.getItem('routine-toggles')||'{}')}
+function saveToggles(d){localStorage.setItem('routine-toggles',JSON.stringify(d))}
+
+function buildNotifs(){
+  const toggles = getToggles();
+  let html = NOTIFS.map(n=>{
+    const on = toggles[n.id]!==false;
+    return `<div class="notif-row">
+      <div class="notif-info">
+        <div class="notif-name">${n.name}</div>
+        <div class="notif-time">${String(n.h).padStart(2,'0')}h${String(n.m).padStart(2,'0')} · Martinique</div>
+      </div>
+      <div class="toggle${on?' on':''}" onclick="toggleNotif('${n.id}',this)">
+        <div class="toggle-dot"></div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('notif-list').innerHTML = html;
+  if(Notification.permission==='granted') document.getElementById('permBtn').textContent='Notifications actives ✓';
+}
+
+function toggleNotif(id, el){
+  const d = getToggles();
+  const current = d[id]!==false;
+  d[id] = !current;
+  saveToggles(d);
+  el.classList.toggle('on', d[id]);
+  scheduleNotifs();
+  toast(d[id]?'Notification activee':'Notification desactivee');
+}
+
+async function requestPerm(){
+  if(!('Notification' in window)){toast('Non supporte sur ce navigateur');return}
+  const p = await Notification.requestPermission();
+  if(p==='granted'){scheduleNotifs();document.getElementById('permBtn').textContent='Notifications actives ✓';toast('Notifications activees !')}
+  else toast('Autorise les notifications dans les reglages');
+}
+
+let notifTimeouts=[];
+function msUntilNext(h,m){
+  const now=new Date();
+  const t=new Date(now);
+  t.setHours(h,m,0,0);
+  if(t<=now) t.setDate(t.getDate()+1);
+  return t-now;
+}
+
+function scheduleNotifs(){
+  notifTimeouts.forEach(clearTimeout);
+  notifTimeouts=[];
+  if(Notification.permission!=='granted') return;
+  const toggles=getToggles();
+  NOTIFS.forEach(n=>{
+    if(toggles[n.id]===false) return;
+    const ms=msUntilNext(n.h,n.m);
+    const id=setTimeout(()=>{
+      new Notification('FBO Routine — '+n.name,{icon:'./icon-192.png',tag:n.tag});
+      setTimeout(scheduleNotifs,1000);
+    },ms);
+    notifTimeouts.push(id);
+  });
+}
+
+// NAV
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function toast(t){
+  const el=document.getElementById('toast');
+  el.textContent=t;el.style.display='block';
+  setTimeout(()=>el.style.display='none',2400);
+}
+
+// INIT
+buildRoutine();
+renderJournal();
+buildNotifs();
+if(Notification.permission==='granted') scheduleNotifs();
+</script>
+</body>
+</html>
